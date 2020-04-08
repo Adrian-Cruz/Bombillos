@@ -74,7 +74,7 @@ class Graph {
 //            }
 //        }
         
-        var arrayVisited = setLightBulbs()
+        var arrayVisited = setLightBulbs2()
         for position in arrayOfPositions {
             print(position)
         }
@@ -89,6 +89,47 @@ class Graph {
                 }
             }
         }
+    }
+    
+    func setLightBulbs2()-> [Node]{
+        var flag = true
+        var arrayOfBulbs = [Node]()
+        
+        
+        while flag {
+            var higherValue = 0
+            var higherNode : Node?
+            for i in 0..<arrayOfNodes.count{
+                for j in 0..<arrayOfNodes[i].count{
+                    let node = arrayOfNodes[i][j]
+                    if !node.visited && node.value == .empty{
+                        
+                        let sumNodesThatCanLight = numberOfNodesThatCanLightToTheLeft(from: node) +
+                            numberOfNodesThatCanLightUpward(from: node) +
+                            numberOfNodesThatCanLightToTheRight(from: node) +
+                            numberOfNodesThatCanLightDownward(from: node) + 1
+                        
+                        if sumNodesThatCanLight > higherValue {
+                            higherValue = sumNodesThatCanLight
+                            higherNode = node
+                            arrayOfPositions.append([i,j])
+                        }
+                    }
+                }
+            }
+            
+            higherNode?.visited = true
+            arrayOfBulbs.append(higherNode!)
+            markLeftNodes(from: higherNode)
+            markRightNodes(from: higherNode)
+            markUpNodes(from: higherNode)
+            markDownNodes(from: higherNode)
+            
+            if theWholeGraphWasVisited(){
+                flag = false
+            }
+        }
+        return arrayOfBulbs
     }
     
     func arrayOfNodesToArray()->[[Int]]{
@@ -135,8 +176,8 @@ class Graph {
     func theWholeGraphWasVisited()->Bool{
         for arrNode in arrayOfNodes {
             for node in arrNode {
-                if node.visited == false {
-                    return true
+                if node.visited == false && node.value != .wall{
+                    return false
                 }
             }
         }
@@ -165,12 +206,18 @@ class Graph {
         if node == nil {
             return
         }
+        if node?.value == ArrayValue.wall {
+            return
+        }
         node?.visited = true
         markLeftNodes(from: node?.left)
     }
     
     func markRightNodes(from node: Node?){
         if node == nil {
+            return
+        }
+        if node?.value == ArrayValue.wall {
             return
         }
         node?.visited = true
@@ -181,6 +228,9 @@ class Graph {
         if node == nil {
             return
         }
+        if node?.value == ArrayValue.wall {
+            return
+        }
         node?.visited = true
         markUpNodes(from: node?.up)
     }
@@ -189,8 +239,72 @@ class Graph {
         if node == nil {
             return
         }
+        if node?.value == ArrayValue.wall {
+            return
+        }
         node?.visited = true
         markDownNodes(from: node?.down)
+    }
+    
+    
+    func numberOfNodesThatCanLightToTheLeft(from node: Node?)-> Int{
+        if node == nil {
+            return 0
+        }
+        if node?.value == ArrayValue.wall {
+            return 0
+        }
+        //node?.visited = true
+        var number = 0
+        if !node!.visited {
+            number = 1
+        }
+        return (numberOfNodesThatCanLightToTheLeft(from: node?.left) + number)
+    }
+    
+    func numberOfNodesThatCanLightToTheRight(from node: Node?)-> Int{
+        if node == nil {
+            return 0
+        }
+        if node?.value == ArrayValue.wall {
+            return 0
+        }
+        //node?.visited = true
+        var number = 0
+        if !node!.visited {
+            number = 1
+        }
+        return (numberOfNodesThatCanLightToTheRight(from: node?.right) + number)
+    }
+    
+    func numberOfNodesThatCanLightUpward(from node: Node?)-> Int{
+        if node == nil {
+            return 0
+        }
+        if node?.value == ArrayValue.wall {
+            return 0
+        }
+        //node?.visited = true
+        var number = 0
+        if !node!.visited {
+            number = 1
+        }
+        return (numberOfNodesThatCanLightUpward(from: node?.up) + number)
+    }
+    
+    func numberOfNodesThatCanLightDownward(from node: Node?)-> Int{
+        if node == nil {
+            return 0
+        }
+        if node?.value == ArrayValue.wall {
+            return 0
+        }
+        //node?.visited = true
+        var number = 0
+        if !node!.visited {
+            number = 1
+        }
+        return (numberOfNodesThatCanLightDownward(from: node?.down) + number)
     }
     
     
